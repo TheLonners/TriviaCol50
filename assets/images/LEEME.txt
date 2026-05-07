@@ -1,0 +1,7 @@
+Guarda aquí las imágenes del proyecto.
+
+Rutas sugeridas en index.html:
+- Fondo: ./assets/images/fondo.jpg
+- QR: ./assets/images/qr-emprendimiento.png
+
+Después actualiza CONFIG.BG_IMAGE y CONFIG.QR_IMAGE en el archivo index.html.

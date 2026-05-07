@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trivia – Emprendimiento Digital 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     TRIVIA EMPRENDIMIENTO DIGITAL 2026
+     ============================================================
+     GUÍA RÁPIDA DE PERSONALIZACIÓN:
+     ─────────────────────────────────────────────────────────
+     • Imagen de fondo  → guarda el archivo en assets/images y busca: BACKGROUND_IMAGE
+     • Imagen QR        → guarda el archivo en assets/images y busca: QR_IMAGE
+     • Tiempo pregunta  → busca: QUESTION_TIME
+     • Preguntas        → busca: BANK DE PREGUNTAS
+     ============================================================ -->
+
+<style>
+/* ============================================================
+   RESET BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ============================================================
+   CSS CUSTOM PROPERTIES – Paleta de marca
+   ============================================================ */
+:root {
+  --yellow:   #fbed64;
+  --blue:     #075b8a;
+  --magenta:  #ff09e3;
+  --cyan:     #00d4ff;
+  --bg-dark:  #08081e;
+  --bg-mid:   #0d1b4b;
+  --white:    #ffffff;
+  --correct:  #39ff14;
+  --wrong:    #ff3860;
+  --card-bg:  rgba(7, 91, 138, 0.28);
+  --glow-y:   0 0 30px rgba(251,237,100,0.6);
+  --glow-c:   0 0 30px rgba(0,212,255,0.5);
+  --glow-m:   0 0 30px rgba(255,9,227,0.6);
+}
+
+/* ============================================================
+   ESTRATEGIA RESPONSIVA — Híbrida
+   ─────────────────────────────────────────────────────────
+   • En desktop/pantallas LED conserva el diseño máster 1920×1080.
+   • En tablets y celulares, especialmente vertical, JS activa
+     #stage.adaptive para que la UI se reorganice y no quede diminuta.
+   • No hay bloqueo de orientación: funciona en horizontal y vertical.
+   ============================================================ */
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-dark);
+  font-family: 'Nunito Sans', sans-serif;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#stage {
+  position: absolute;
+  width:  1920px;
+  height: 1080px;
+  top:  50%;
+  left: 50%;
+  /* JS inyecta: transform: translate(-50%,-50%) scale(s) */
+  transform-origin: center center;
+  overflow: hidden;
+  color: var(--white);
+}
+
+/* ============================================================
+   FONDO (BACKGROUND_IMAGE)
+   ─────────────────────────────────────────────────────────
+   Para cambiar la imagen de fondo busca la variable
+   JS  →  CONFIG.BG_IMAGE  (línea ~340 del script)
+   o cambia directamente el background-image aquí abajo.
+
+   Si no hay imagen, se usa el gradiente de marca como fallback.
+   ============================================================ */
+#bg-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  /* La imagen se asigna dinámicamente desde JS (CONFIG.BG_IMAGE) */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+/* Capa de oscurecimiento sobre la imagen para mantener legibilidad */
+#bg-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 80% 60% at 15% 110%, rgba(7,91,138,0.60) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% -10%,  rgba(255,9,227,0.25) 0%, transparent 70%),
+    rgba(8, 8, 30, 0.55);
+}
+
+/* Circuito decorativo SVG */
+.circuit-svg {
+  position: absolute;
+  inset: 0; width: 100%; height: 100%;
+  opacity: 0.10; z-index: 2; pointer-events: none;
+}
+
+/* Grilla animada de puntos */
+.dot-grid {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0,212,255,0.14) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: driftGrid 30s linear infinite;
+}
+@keyframes driftGrid {
+  0%   { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+
+/* Orbes flotantes decorativos */
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(2px); animation: floatOrb linear infinite;
+  z-index: 2; pointer-events: none;
+}
+.orb-1 { width:28px;height:28px; background:radial-gradient(circle,#ff09e3,#075b8a); top:8%;left:92%;  animation-duration:9s;  }
+.orb-2 { width:18px;height:18px; background:radial-gradient(circle,#fbed64,#ff09e3); top:85%;left:6%;  animation-duration:12s; }
+.orb-3 { width:40px;height:40px; background:radial-gradient(circle,#00d4ff,#075b8a); top:50%;left:97%; animation-duration:15s; }
+.orb-4 { width:14px;height:14px; background:radial-gradient(circle,#fbed64,transparent); top:20%;left:2%;animation-duration:8s; }
+@keyframes floatOrb {
+  0%,100% { transform: translateY(0)     scale(1);    opacity:.9; }
+  50%     { transform: translateY(-30px) scale(1.15); opacity:.6; }
+}
+
+/* Contenedor de partículas */
+.particles-wrap {
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 3; overflow: hidden;
+}
+.particle {
+  position: absolute; border-radius: 50%;
+  animation: particleFly linear forwards;
+}
+@keyframes particleFly {
+  0%   { transform: translate(0,0) scale(1); opacity:1; }
+  100% { transform: translate(var(--tx),var(--ty)) scale(0); opacity:0; }
+}
+
+/* ============================================================
+   APP – CAPA PRINCIPAL (sobre el fondo)
+   ============================================================ */
+#app {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Pantallas */
+.screen {
+  display: none;
+  width: 1920px; height: 1080px;
+  align-items: center; justify-content: center; flex-direction: column;
+}
+.screen.active { display: flex; }
+
+/* ============================================================
+   PANTALLA DE BIENVENIDA
+   ============================================================ */
+#screen-welcome {
+  flex-direction: row;          /* logo-izq | QR-der */
+  align-items: center;
+  justify-content: center;
+  gap: 120px;
+  padding: 60px 100px;
+}
+
+/* Columna izquierda: logos + título + botón */
+.welcome-left {
+  display: flex; flex-direction: column;
+  align-items: flex-start; gap: 0;
+  flex: 1; max-width: 900px;
+}
+
+.brand-logos {
+  display: flex; align-items: center; gap: 40px;
+  margin-bottom: 36px;
+  animation: fadeDown .7s ease both;
+}
+.brand-tag {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px; font-weight: 600;
+  letter-spacing: 3px; color: rgba(255,255,255,0.55);
+  text-transform: uppercase;
+}
+.brand-divider { width:1px; height:32px; background:rgba(255,255,255,0.2); }
+
+.welcome-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 96px; font-weight: 900; line-height: 1;
+  letter-spacing: -2px; margin-bottom: 14px;
+  animation: fadeDown .85s ease .08s both;
+}
+.welcome-title .emp { color: var(--white); }
+.welcome-title .dig {
+  color: var(--yellow);
+  text-shadow: 0 0 40px rgba(251,237,100,.75), 0 0 80px rgba(251,237,100,.3);
+}
+
+.welcome-sub {
+  font-size: 26px; font-weight: 600;
+  color: rgba(255,255,255,0.55); letter-spacing: 8px;
+  text-transform: uppercase; margin-bottom: 56px;
+  animation: fadeDown .9s ease .16s both;
+}
+
+/* Indicador de teclas */
+.kb-hint {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 32px;
+  animation: fadeUp .9s ease .3s both;
+}
+.kb-badge {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--cyan); background: rgba(0,212,255,0.12);
+  border: 1.5px solid rgba(0,212,255,0.35);
+  border-radius: 8px; padding: 6px 14px;
+  text-shadow: var(--glow-c);
+}
+.kb-text {
+  font-size: 18px; color: rgba(255,255,255,0.45);
+  letter-spacing: 1px;
+}
+/* La interacción numérica existe, pero queda oculta visualmente. */
+.kb-hint, .answer-number-wrap { display: none !important; }
+
+.btn-start {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 30px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  background: linear-gradient(135deg, var(--yellow) 0%, #f9c200 100%);
+  color: #08081e; border: none;
+  padding: 26px 96px; border-radius: 60px;
+  cursor: pointer; position: relative; overflow: hidden;
+  animation: fadeUp .95s ease .24s both, pulseShadow 2.5s ease 1.2s infinite;
+  transition: transform .15s ease;
+}
+.btn-start::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,.28), transparent);
+  border-radius:inherit;
+}
+.btn-start:hover  { transform: scale(1.04); }
+.btn-start:active { transform: scale(.97);  }
+@keyframes pulseShadow {
+  0%,100% { box-shadow: 0 0 30px rgba(251,237,100,.5), 0 8px 40px rgba(0,0,0,.4); }
+  50%     { box-shadow: 0 0 70px rgba(251,237,100,.9), 0 8px 40px rgba(0,0,0,.4); }
+}
+
+/* Columna derecha: QR */
+/* ============================================================
+   QR CODE (QR_IMAGE)
+   ─────────────────────────────────────────────────────────
+   Para cambiar la imagen del QR busca en JS:
+     CONFIG.QR_IMAGE  (línea ~345 del script)
+   ============================================================ */
+.welcome-right {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 24px;
+  animation: fadeUp .9s ease .2s both;
+}
+.qr-container {
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(0,212,255,0.3);
+  border-radius: 28px;
+  padding: 28px;
+  backdrop-filter: blur(14px);
+  box-shadow: 0 0 60px rgba(0,212,255,0.15), 0 20px 60px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
+}
+.qr-container::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--yellow));
+}
+.qr-img {
+  display: block;
+  width: 340px; height: 340px;
+  border-radius: 12px;
+  object-fit: contain;
+  background: #fff; /* fallback si la imagen tarda */
+}
+.qr-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px; font-weight: 600; letter-spacing: 4px;
+  color: var(--cyan); text-transform: uppercase;
+  text-shadow: var(--glow-c); text-align: center;
+}
+.qr-sublabel {
+  font-size: 18px; font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px; text-align: center;
+}
+
+/* ============================================================
+   PANTALLA DE PREGUNTA
+   ============================================================ */
+#screen-question {
+  flex-direction: column;
+  padding: 0 80px; gap: 0;
+}
+
+/* Barra superior */
+.top-bar {
+  width: 100%; display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 28px 0 20px; flex-shrink: 0;
+}
+.q-counter {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: rgba(255,255,255,0.5); letter-spacing: 3px;
+}
+.q-counter span { font-size:34px; color:var(--cyan); text-shadow:var(--glow-c); }
+
+.score-box {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(7,91,138,0.3);
+  border: 1px solid rgba(0,212,255,0.2);
+  border-radius: 50px; padding: 10px 32px;
+  backdrop-filter: blur(8px);
+}
+.score-label {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 17px; font-weight: 600; letter-spacing: 3px;
+  color: rgba(255,255,255,.5); text-transform: uppercase;
+}
+.score-value {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 40px; font-weight: 900;
+  color: var(--yellow); text-shadow: var(--glow-y);
+  min-width: 55px; text-align: right;
+}
+.score-value.pop { animation: scorePop .4s cubic-bezier(.34,1.56,.64,1); }
+@keyframes scorePop {
+  0%  { transform:scale(1);   }
+  50% { transform:scale(1.5); }
+  100%{ transform:scale(1);   }
+}
+
+/* Barra de progreso */
+.progress-bar-wrap {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,.08);
+  border-radius: 3px; overflow: hidden;
+  flex-shrink: 0; margin-bottom: 26px;
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta));
+  border-radius: 3px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 12px rgba(0,212,255,.6);
+}
+
+/* Tarjeta de pregunta */
+.question-card {
+  width: 100%; max-width: 1340px;
+  background: var(--card-bg);
+  border: 1px solid rgba(0,212,255,.2);
+  border-radius: 26px; padding: 36px 64px;
+  text-align: center; backdrop-filter: blur(16px);
+  flex-shrink: 0; margin: 0 auto 30px;
+  box-shadow: 0 8px 60px rgba(0,0,0,.4),
+              inset 0 1px 0 rgba(255,255,255,.06);
+  position: relative; overflow: hidden;
+}
+.question-card::before {
+  content:''; position:absolute;
+  top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--yellow));
+}
+.q-category {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 14px; font-weight: 600; letter-spacing: 5px;
+  text-transform: uppercase; color: var(--cyan);
+  margin-bottom: 16px; text-shadow: var(--glow-c);
+}
+.q-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 38px; font-weight: 700; line-height: 1.3;
+  color: var(--white);
+}
+
+/* Grid de respuestas */
+.answers-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 22px; width: 100%; max-width: 1440px;
+  margin: 0 auto; flex: 1; padding-bottom: 32px;
+}
+
+.answer-btn {
+  position: relative; display: flex;
+  align-items: center; justify-content: center; gap: 0;
+  padding: 0 40px;
+  background: rgba(7,91,138,.2);
+  border: 2px solid rgba(0,212,255,.25);
+  border-radius: 20px; cursor: pointer;
+  text-align: center; overflow: hidden;
+  transition: border-color .2s, background .2s, transform .12s;
+  backdrop-filter: blur(10px); min-height: 106px;
+}
+.answer-btn::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg,rgba(255,255,255,.04),transparent);
+  pointer-events:none;
+}
+.answer-btn:hover:not(:disabled) {
+  border-color: rgba(0,212,255,.65);
+  background: rgba(7,91,138,.42);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 40px rgba(0,0,0,.3), var(--glow-c);
+}
+.answer-btn:active:not(:disabled) { transform: scale(.98); }
+.answer-btn:disabled { cursor: default; }
+
+/* Número de tecla + letra */
+.answer-number-wrap {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  flex-shrink: 0;
+}
+.answer-key {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase;
+}
+.answer-letter {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px; font-weight: 900; color: var(--cyan);
+  min-width: 50px; height: 50px; border-radius: 12px;
+  background: rgba(0,212,255,.1);
+  border: 2px solid rgba(0,212,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  transition: all .3s;
+}
+.answer-text {
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 24px; font-weight: 700;
+  color: var(--white); line-height: 1.3;
+  width: 100%; text-align: center;
+}
+
+/* Estados de respuesta */
+.answer-btn.correct {
+  border-color: var(--correct);
+  background: rgba(57,255,20,.15);
+  box-shadow: 0 0 40px rgba(57,255,20,.35), 0 8px 30px rgba(0,0,0,.3);
+  animation: correctPulse .5s ease;
+}
+.answer-btn.correct .answer-letter {
+  background: var(--correct); border-color: var(--correct);
+  color: #08081e; box-shadow: 0 0 20px rgba(57,255,20,.6);
+}
+.answer-btn.wrong {
+  border-color: var(--wrong);
+  background: rgba(255,56,96,.15);
+  box-shadow: 0 0 40px rgba(255,56,96,.3), 0 8px 30px rgba(0,0,0,.3);
+  animation: wrongShake .5s ease;
+}
+.answer-btn.wrong .answer-letter {
+  background: var(--wrong); border-color: var(--wrong);
+  color: var(--white); box-shadow: 0 0 20px rgba(255,56,96,.6);
+}
+.answer-btn.dimmed { opacity: .22; }
+@keyframes correctPulse {
+  0%  {transform:scale(1);}  40%{transform:scale(1.04);}  100%{transform:scale(1);}
+}
+@keyframes wrongShake {
+  0%,100%{transform:translateX(0);}
+  15%{transform:translateX(-14px);} 30%{transform:translateX(10px);}
+  45%{transform:translateX(-8px);}  60%{transform:translateX(6px);}
+  75%{transform:translateX(-4px);}
+}
+
+/* Efecto ripple al tocar */
+.ripple {
+  position:absolute; border-radius:50%; transform:scale(0);
+  animation: rippleAnim .6s linear; pointer-events:none;
+  background: rgba(0,212,255,.25);
+}
+@keyframes rippleAnim { to { transform:scale(4); opacity:0; } }
+
+/* ============================================================
+   OVERLAYS (dentro del stage)
+   ============================================================ */
+
+/* Mensaje feedback (Correcto / Incorrecto) */
+.feedback-overlay {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center;
+  z-index: 100; pointer-events: none;
+  opacity: 0; transition: opacity .3s;
+}
+.feedback-overlay.show { opacity: 1; }
+.feedback-msg {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 70px; font-weight: 900;
+  letter-spacing: 4px; text-transform: uppercase;
+  padding: 26px 76px; border-radius: 28px;
+  backdrop-filter: blur(20px);
+  animation: feedbackPop .4s cubic-bezier(.34,1.56,.64,1);
+}
+.feedback-msg.correct-msg {
+  color: var(--correct); background: rgba(57,255,20,.12);
+  border: 3px solid var(--correct);
+  box-shadow: 0 0 60px rgba(57,255,20,.5), 0 20px 80px rgba(0,0,0,.5);
+  text-shadow: 0 0 40px rgba(57,255,20,.8);
+}
+.feedback-msg.wrong-msg {
+  color: var(--wrong); background: rgba(255,56,96,.12);
+  border: 3px solid var(--wrong);
+  box-shadow: 0 0 60px rgba(255,56,96,.5), 0 20px 80px rgba(0,0,0,.5);
+  text-shadow: 0 0 40px rgba(255,56,96,.8);
+}
+@keyframes feedbackPop {
+  0%   {transform:scale(.6) rotate(-3deg); opacity:0;}
+  80%  {transform:scale(1.05) rotate(1deg);}
+  100% {transform:scale(1) rotate(0deg); opacity:1;}
+}
+
+/* Caja de explicación */
+.explanation-box {
+  position: absolute; bottom: 44px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(7,91,138,.5);
+  border: 1px solid rgba(0,212,255,.3);
+  border-radius: 20px; padding: 18px 56px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 22px; font-weight: 700;
+  color: rgba(255,255,255,.85); text-align: center;
+  backdrop-filter: blur(16px); z-index: 99;
+  opacity: 0; transition: opacity .4s, transform .4s;
+  max-width: 1320px; white-space: nowrap;
+}
+.explanation-box.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+.explanation-box .exp-label {
+  font-family: 'Orbitron', sans-serif; font-size: 12px;
+  font-weight: 700; letter-spacing: 4px; color: var(--cyan);
+  margin-bottom: 5px; text-transform: uppercase;
+}
+
+/* Anillo de cuenta regresiva */
+.countdown-ring {
+  position: absolute; top: 34px; left: 50%;
+  transform: translateX(-50%); z-index: 50;
+}
+.countdown-ring svg { transform: rotate(-90deg); }
+.countdown-ring-track { stroke: rgba(255,255,255,.08); }
+.countdown-ring-fill {
+  stroke: var(--cyan); stroke-dasharray: 188.5;
+  stroke-dashoffset: 188.5;
+  transition: stroke-dashoffset 1s linear, stroke .3s;
+  filter: drop-shadow(0 0 6px rgba(0,212,255,.8));
+}
+.countdown-num {
+  position: absolute; top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--cyan);
+  text-shadow: var(--glow-c);
+}
+
+/* ============================================================
+   PANTALLA DE RESULTADOS
+   ============================================================ */
+#screen-results {
+  flex-direction: column; gap: 0; padding: 50px 120px;
+}
+.results-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 62px; font-weight: 900; letter-spacing: -1px;
+  text-align: center; margin-bottom: 10px;
+  animation: fadeDown .7s ease both;
+}
+.results-title span { color: var(--yellow); text-shadow: var(--glow-y); }
+.results-subtitle {
+  font-size: 22px; color: rgba(255,255,255,.5); letter-spacing: 5px;
+  text-align: center; text-transform: uppercase; margin-bottom: 52px;
+  animation: fadeDown .7s ease .1s both;
+}
+.score-display {
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 56px; animation: fadeUp .8s ease .2s both;
+}
+.score-circle {
+  position: relative; width: 250px; height: 250px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.score-circle-bg {
+  position: absolute; inset: 0; border-radius: 50%;
+  animation: spinIn 1s ease .3s both;
+}
+.score-circle-inner {
+  position: absolute; inset: 15px; border-radius: 50%;
+  background: #08081e;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  box-shadow: inset 0 4px 20px rgba(0,0,0,.5);
+}
+.score-big {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 76px; font-weight: 900;
+  color: var(--yellow); text-shadow: var(--glow-y); line-height: 1;
+}
+.score-total {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 24px; font-weight: 600; color: rgba(255,255,255,.4);
+}
+@keyframes spinIn {
+  from {transform:rotate(-90deg); opacity:0;}
+  to   {transform:rotate(0);      opacity:1;}
+}
+.result-message { text-align: center; margin-left: 60px; }
+.result-emoji {
+  font-size: 76px; line-height: 1; margin-bottom: 14px;
+  animation: bounceIn .6s cubic-bezier(.34,1.56,.64,1) .6s both;
+}
+@keyframes bounceIn {
+  from {transform:scale(0);opacity:0;} to {transform:scale(1);opacity:1;}
+}
+.result-text {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 38px; font-weight: 800; color: var(--white); margin-bottom: 10px;
+}
+.result-desc {
+  font-size: 21px; color: rgba(255,255,255,.55);
+  max-width: 480px; line-height: 1.5;
+}
+
+.results-actions {
+  display: flex; gap: 28px;
+  animation: fadeUp .8s ease .5s both;
+}
+.btn-action {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 22px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; border: none;
+  padding: 24px 68px; border-radius: 50px;
+  cursor: pointer; transition: transform .15s, box-shadow .2s;
+  overflow: hidden;
+}
+.btn-action:hover  { transform: translateY(-4px) scale(1.03); }
+.btn-action:active { transform: scale(.97); }
+.btn-restart {
+  background: linear-gradient(135deg, var(--yellow), #f9c200);
+  color: #08081e;
+  box-shadow: 0 0 30px rgba(251,237,100,.4), 0 8px 30px rgba(0,0,0,.4);
+}
+.btn-restart:hover {
+  box-shadow: 0 0 55px rgba(251,237,100,.75), 0 12px 40px rgba(0,0,0,.4);
+}
+
+/* ============================================================
+   ANIMACIONES COMPARTIDAS
+   ============================================================ */
+@keyframes fadeDown {
+  from {transform:translateY(-30px); opacity:0;}
+  to   {transform:translateY(0);     opacity:1;}
+}
+@keyframes fadeUp {
+  from {transform:translateY(30px); opacity:0;}
+  to   {transform:translateY(0);    opacity:1;}
+}
+.q-enter { animation: qEnter .42s cubic-bezier(.22,1,.36,1) both; }
+@keyframes qEnter {
+  from {transform:translateX(80px) scale(.97); opacity:0;}
+  to   {transform:translateX(0) scale(1);      opacity:1;}
+}
+
+
+
+/* ============================================================
+   RESPONSIVE REAL — desktop, tablets y celulares en vertical
+   ============================================================
+   En escritorio se conserva el canvas maestro 1920×1080.
+   En pantallas pequeñas o verticales JS activa #stage.adaptive:
+   la interfaz deja de escalar como imagen fija y pasa a distribuirse
+   con CSS fluido para ocupar bien la pantalla.
+   ============================================================ */
+#stage.adaptive {
+  position: fixed;
+  inset: 0;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100svh;
+  transform: none !important;
+  transform-origin: center center;
+}
+
+#stage.adaptive .screen {
+  width: 100%;
+  height: 100%;
+}
+
+#stage.adaptive #screen-welcome {
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(18px, 4vh, 42px);
+  padding: clamp(22px, 5vw, 54px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#stage.adaptive .welcome-left {
+  align-items: center;
+  text-align: center;
+  max-width: 100%;
+  flex: 0 0 auto;
+}
+
+#stage.adaptive .brand-logos {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: clamp(14px, 3vh, 24px);
+}
+
+#stage.adaptive .brand-divider { display: none; }
+
+#stage.adaptive .brand-tag {
+  font-size: clamp(9px, 2.2vw, 13px);
+  letter-spacing: clamp(1px, .5vw, 3px);
+}
+
+#stage.adaptive .welcome-title {
+  font-size: clamp(42px, 10vw, 86px);
+  letter-spacing: -1px;
+  margin-bottom: clamp(8px, 1.5vh, 14px);
+}
+
+#stage.adaptive .welcome-sub {
+  font-size: clamp(14px, 3vw, 24px);
+  letter-spacing: clamp(3px, 1vw, 8px);
+  margin-bottom: clamp(22px, 4vh, 44px);
+}
+
+#stage.adaptive .btn-start {
+  font-size: clamp(18px, 4vw, 28px);
+  letter-spacing: clamp(2px, .9vw, 4px);
+  padding: clamp(18px, 4vw, 26px) clamp(46px, 12vw, 96px);
+}
+
+#stage.adaptive .welcome-right {
+  gap: clamp(12px, 2vh, 22px);
+  flex: 0 0 auto;
+}
+
+#stage.adaptive .qr-container {
+  padding: clamp(14px, 3vw, 26px);
+  border-radius: clamp(18px, 4vw, 28px);
+}
+
+#stage.adaptive .qr-img {
+  width: clamp(150px, 44vw, 300px);
+  height: clamp(150px, 44vw, 300px);
+}
+
+#stage.adaptive .qr-label {
+  font-size: clamp(11px, 2.6vw, 14px);
+  letter-spacing: clamp(2px, .8vw, 4px);
+}
+
+#stage.adaptive .qr-sublabel {
+  font-size: clamp(14px, 3vw, 18px);
+}
+
+#stage.adaptive #screen-question {
+  justify-content: flex-start;
+  padding: clamp(14px, 4vw, 34px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#stage.adaptive .top-bar {
+  padding: 0 0 clamp(10px, 2vh, 18px);
+  gap: 12px;
+}
+
+#stage.adaptive .q-counter {
+  font-size: clamp(12px, 2.6vw, 18px);
+  letter-spacing: clamp(1px, .6vw, 3px);
+}
+
+#stage.adaptive .q-counter span {
+  font-size: clamp(22px, 5vw, 34px);
+}
+
+#stage.adaptive .score-box {
+  padding: clamp(7px, 1.8vw, 10px) clamp(16px, 4vw, 32px);
+  gap: clamp(8px, 2vw, 14px);
+}
+
+#stage.adaptive .score-label {
+  font-size: clamp(11px, 2.5vw, 17px);
+  letter-spacing: clamp(1px, .7vw, 3px);
+}
+
+#stage.adaptive .score-value {
+  font-size: clamp(26px, 6vw, 40px);
+  min-width: clamp(32px, 8vw, 55px);
+}
+
+#stage.adaptive .progress-bar-wrap {
+  margin-bottom: clamp(14px, 2.5vh, 24px);
+}
+
+#stage.adaptive .countdown-ring {
+  top: clamp(12px, 2.5vh, 34px);
+  transform: translateX(-50%) scale(clamp(.78, 1.5vw, 1));
+}
+
+#stage.adaptive .question-card {
+  max-width: none;
+  width: 100%;
+  padding: clamp(22px, 5vw, 42px) clamp(18px, 5vw, 56px);
+  margin: 0 0 clamp(16px, 3vh, 28px);
+  border-radius: clamp(18px, 4vw, 26px);
+}
+
+#stage.adaptive .q-category {
+  font-size: clamp(11px, 2.5vw, 14px);
+  letter-spacing: clamp(2px, .9vw, 5px);
+  margin-bottom: clamp(10px, 2vh, 16px);
+}
+
+#stage.adaptive .q-text {
+  font-size: clamp(22px, 5.2vw, 38px);
+  line-height: 1.25;
+}
+
+#stage.adaptive .answers-grid {
+  grid-template-columns: 1fr;
+  grid-template-rows: none;
+  gap: clamp(12px, 2.3vh, 20px);
+  max-width: none;
+  width: 100%;
+  flex: 0 0 auto;
+  padding-bottom: clamp(18px, 4vh, 32px);
+}
+
+#stage.adaptive .answer-btn {
+  min-height: clamp(76px, 13vh, 116px);
+  padding: clamp(16px, 4vw, 30px);
+  border-radius: clamp(16px, 4vw, 20px);
+}
+
+#stage.adaptive .answer-text {
+  font-size: clamp(17px, 4.2vw, 24px);
+  line-height: 1.25;
+}
+
+#stage.adaptive .feedback-msg {
+  font-size: clamp(34px, 9vw, 70px);
+  padding: clamp(18px, 4vw, 26px) clamp(24px, 8vw, 76px);
+  max-width: calc(100vw - 36px);
+  text-align: center;
+}
+
+#stage.adaptive .explanation-box {
+  position: fixed;
+  left: clamp(14px, 4vw, 34px);
+  right: clamp(14px, 4vw, 34px);
+  bottom: clamp(16px, 4vh, 44px);
+  transform: translateY(20px);
+  max-width: none;
+  white-space: normal;
+  font-size: clamp(16px, 3.7vw, 22px);
+  padding: clamp(14px, 3vw, 18px) clamp(18px, 4vw, 42px);
+}
+
+#stage.adaptive .explanation-box.show {
+  transform: translateY(0);
+}
+
+#stage.adaptive #screen-results {
+  padding: clamp(26px, 6vw, 54px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#stage.adaptive .results-title {
+  font-size: clamp(34px, 8vw, 62px);
+}
+
+#stage.adaptive .results-subtitle {
+  font-size: clamp(14px, 3vw, 22px);
+  letter-spacing: clamp(2px, .8vw, 5px);
+  margin-bottom: clamp(28px, 5vh, 52px);
+}
+
+#stage.adaptive .score-display {
+  flex-direction: column;
+  gap: clamp(24px, 5vh, 40px);
+  margin-bottom: clamp(34px, 6vh, 56px);
+}
+
+#stage.adaptive .score-circle {
+  width: clamp(190px, 48vw, 250px);
+  height: clamp(190px, 48vw, 250px);
+}
+
+#stage.adaptive .score-big {
+  font-size: clamp(58px, 15vw, 76px);
+}
+
+#stage.adaptive .result-message {
+  margin-left: 0;
+}
+
+#stage.adaptive .result-emoji {
+  font-size: clamp(60px, 15vw, 76px);
+}
+
+#stage.adaptive .result-text {
+  font-size: clamp(28px, 7vw, 38px);
+}
+
+#stage.adaptive .result-desc {
+  font-size: clamp(17px, 4vw, 21px);
+}
+
+#stage.adaptive .results-actions {
+  width: 100%;
+  justify-content: center;
+}
+
+#stage.adaptive .btn-action {
+  width: min(100%, 420px);
+  font-size: clamp(17px, 4vw, 22px);
+  padding: clamp(18px, 4vw, 24px) clamp(36px, 9vw, 68px);
+}
+
+@media (max-width: 640px) {
+  #stage.adaptive .top-bar {
+    align-items: flex-start;
+  }
+  #stage.adaptive .score-label { display: none; }
+}
+
+</style>
+</head>
+<body>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     STAGE — Canvas maestro 1920×1080
+     Todo el juego vive aquí; JS lo escala al viewport.
+     ══════════════════════════════════════════════════════════ -->
+<div id="stage">
+
+  <!-- CAPAS DE FONDO -->
+  <div id="bg-layer"></div>
+  <div id="bg-overlay"></div>
+
+  <!-- Decoración SVG circuito -->
+  <svg class="circuit-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+    <g stroke="#00d4ff" stroke-width="1.2" fill="none">
+      <polyline points="0,200 120,200 160,240 400,240 440,200 700,200"/>
+      <polyline points="0,600 80,600 120,640 300,640 340,600 500,600 540,560 700,560"/>
+      <polyline points="1920,300 1800,300 1760,340 1600,340 1560,300 1400,300"/>
+      <polyline points="1920,750 1840,750 1800,790 1620,790 1580,750 1360,750"/>
+      <polyline points="0,900 200,900 240,860 600,860"/>
+      <polyline points="1920,500 1700,500 1660,540 1500,540"/>
+      <circle cx="120" cy="200" r="5" fill="#00d4ff" opacity=".6"/>
+      <circle cx="440" cy="200" r="5" fill="#00d4ff" opacity=".6"/>
+      <circle cx="120" cy="640" r="5" fill="#ff09e3" opacity=".6"/>
+      <circle cx="340" cy="600" r="5" fill="#ff09e3" opacity=".6"/>
+      <circle cx="1800" cy="300" r="5" fill="#00d4ff" opacity=".6"/>
+      <circle cx="1560" cy="300" r="5" fill="#00d4ff" opacity=".6"/>
+      <circle cx="1840" cy="750" r="5" fill="#fbed64" opacity=".6"/>
+      <circle cx="1580" cy="750" r="5" fill="#fbed64" opacity=".6"/>
+      <circle cx="200"  cy="900" r="5" fill="#fbed64" opacity=".5"/>
+    </g>
+  </svg>
+
+  <div class="dot-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="orb orb-4"></div>
+  <div class="particles-wrap" id="particlesWrap"></div>
+
+  <!-- OVERLAYS (dentro del stage para escalar junto a la UI) -->
+  <div class="feedback-overlay" id="feedbackOverlay">
+    <div class="feedback-msg" id="feedbackMsg"></div>
+  </div>
+  <div class="explanation-box" id="explanationBox">
+    <div class="exp-label">¿Por qué?</div>
+    <div id="explanationText"></div>
+  </div>
+  <div class="countdown-ring" id="countdownRing" style="display:none;">
+    <svg width="72" height="72" viewBox="0 0 72 72">
+      <circle class="countdown-ring-track" cx="36" cy="36" r="30" stroke-width="5" fill="none"/>
+      <circle class="countdown-ring-fill" id="countdownFill"
+              cx="36" cy="36" r="30" stroke-width="5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="countdown-num" id="countdownNum">10</div>
+  </div>
+
+  <!-- PANTALLAS -->
+  <div id="app">
+
+    <!-- ── BIENVENIDA ── -->
+    <section class="screen active" id="screen-welcome">
+      <div class="welcome-left">
+        <div class="brand-logos">
+          <span class="brand-tag">Min TIC</span>
+          <div class="brand-divider"></div>
+          <span class="brand-tag">Comercio · Industria · Turismo</span>
+          <div class="brand-divider"></div>
+          <span class="brand-tag">iNNpulsa Colombia</span>
+        </div>
+        <h1 class="welcome-title">
+          <span class="emp">Emprendimiento</span><br>
+          <span class="dig">Digital</span>
+        </h1>
+        <p class="welcome-sub">Trivia 2026</p>
+        <button class="btn-start" id="btnStart">¡Comenzar!</button>
+      </div>
+
+      <!-- QR code -->
+      <div class="welcome-right">
+        <div class="qr-container">
+          <!-- La imagen del QR se asigna desde CONFIG.QR_IMAGE en JS -->
+          <img class="qr-img" id="qrImg" src="" alt="Código QR">
+        </div>
+        <div class="qr-label">Escanea el QR</div>
+        <div class="qr-sublabel" id="qrSubLabel">para más información</div>
+      </div>
+    </section>
+
+    <!-- ── PREGUNTA ── -->
+    <section class="screen" id="screen-question">
+      <div class="top-bar">
+        <div class="q-counter">
+          PREGUNTA <span id="qNumDisplay">1</span> / <span id="qTotalDisplay">5</span>
+        </div>
+        <div class="score-box">
+          <span class="score-label">Puntos</span>
+          <span class="score-value" id="scoreDisplay">0</span>
+        </div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="question-card q-enter" id="questionCard">
+        <div class="q-category" id="qCategory">Emprendimiento Digital</div>
+        <div class="q-text" id="qText"></div>
+      </div>
+      <div class="answers-grid" id="answersGrid"></div>
+    </section>
+
+    <!-- ── RESULTADOS ── -->
+    <section class="screen" id="screen-results">
+      <h2 class="results-title">¡Resultados <span>Finales</span>!</h2>
+      <p class="results-subtitle">Emprendimiento Digital · Trivia 2026</p>
+      <div class="score-display">
+        <div class="score-circle">
+          <div class="score-circle-bg" id="scoreCircleBg"></div>
+          <div class="score-circle-inner">
+            <div class="score-big"  id="finalScoreNum">0</div>
+            <div class="score-total" id="finalScoreTotal">/ 0</div>
+          </div>
+        </div>
+        <div class="result-message">
+          <div class="result-emoji" id="resultEmoji">🏆</div>
+          <div class="result-text"  id="resultText">¡Increíble!</div>
+          <div class="result-desc"  id="resultDesc">Dominas el ecosistema digital colombiano.</div>
+        </div>
+      </div>
+      <div class="results-actions">
+        <!-- El botón reinicia el juego con preguntas nuevamente mezcladas -->
+        <button class="btn-action btn-restart" id="btnRestart">Jugar de Nuevo</button>
+      </div>
+    </section>
+
+  </div><!-- /#app -->
+</div><!-- /#stage -->
+
+<script>
+/* ============================================================
+   ██████╗  ██████╗ ███╗   ██╗███████╗██╗ ██████╗
+   ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝
+   ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗
+   ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
+   ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
+    ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝
+   ============================================================ */
+
+/* ============================================================
+   ① CONFIGURACIÓN GLOBAL – CAMBIA AQUÍ LOS VALORES CLAVE
+   ============================================================ */
+const CONFIG = {
+  /* ── TIEMPO POR PREGUNTA (segundos) ─────────────────────
+     Cambia este número para modificar el tiempo disponible. */
+  QUESTION_TIME: 10,
+
+  /* ── IMAGEN DE FONDO (BACKGROUND_IMAGE) ─────────────────
+     Pon la ruta o URL de tu imagen de fondo.
+     Ejemplos:
+       './assets/images/fondo.jpg'
+       'https://miservidor.com/fondo.png'
+     Si está vacío ('') se usará el gradiente de marca.      */
+  BG_IMAGE: '',
+
+  /* ── IMAGEN DEL CÓDIGO QR (QR_IMAGE) ────────────────────
+     Pon la ruta o URL de la imagen del QR.
+     Ejemplos:
+       './assets/images/qr-emprendimiento.png'
+       'https://miservidor.com/qr.png'
+     Si está vacío se mostrará un placeholder visual.         */
+  QR_IMAGE: '',
+
+  /* ── TEXTO DEBAJO DEL QR ────────────────────────────── */
+  QR_SUBLABEL: 'emprendimientodigital.gov.co',
+};
+
+/* ============================================================
+   ② BANCO DE PREGUNTAS
+   ─────────────────────────────────────────────────────────
+   Para agregar/editar preguntas sigue este formato:
+   {
+     category: "Emoji + Nombre de categoría",
+     text: "Texto de la pregunta",
+     options: ["opción A","opción B","opción C","opción D"],
+     correctText: "Texto EXACTO de la opción correcta",
+     explanation: "Explicación breve de la respuesta"
+   }
+   ─────────────────────────────────────────────────────────
+   IMPORTANTE: correctText debe coincidir exactamente con
+   uno de los valores en options. Las opciones se mezclarán
+   aleatoriamente al cargar, por eso usamos correctText
+   en vez de un índice fijo.
+   ============================================================ */
+const QUESTION_BANK = [
+  {
+    category: "🧠 Design Thinking",
+    text: "¿Para qué sirve el Design Thinking?",
+    options: [
+      "Reducir costos de producción",
+      "Mejorar compatibilidad técnica",
+      "Diseñar marcas atractivas",
+      "Crear soluciones centradas en el usuario",
+    ],
+    correctText: "Crear soluciones centradas en el usuario",
+    explanation: "Empatía con el usuario para diseñar soluciones relevantes.",
+  },
+  {
+    category: "🚀 Innovación",
+    text: "¿Qué es un MVP?",
+    options: [
+      "Una campaña de marketing",
+      "Un producto final completo",
+      "Un plan financiero",
+      "Una versión lista para validación real",
+    ],
+    correctText: "Una versión lista para validación real",
+    explanation: "Permite probar una idea real con el menor esfuerzo posible.",
+  },
+  {
+    category: "📈 Startups",
+    text: '¿Qué significa "pivotar" en una startup?',
+    options: [
+      "Financiarse sin inversionistas",
+      "Cambiar la estrategia según el mercado",
+      "Entrar a una incubadora",
+      "Expandirse rápido",
+    ],
+    correctText: "Cambiar la estrategia según el mercado",
+    explanation: "Es ajustar el rumbo con base en lo aprendido.",
+  },
+  {
+    category: "💡 Tecnología",
+    text: "¿Qué es una tecnología disruptiva?",
+    options: [
+      "Una mejora pequeña",
+      "Una herramienta exclusiva",
+      "Una innovación que transforma mercados",
+      "Un software avanzado",
+    ],
+    correctText: "Una innovación que transforma mercados",
+    explanation: "Cambia las reglas del juego y crea nuevas oportunidades.",
+  },
+  {
+    category: "📊 Negocios Digitales",
+    text: "¿Qué significa escalabilidad?",
+    options: [
+      "Contratar más personal",
+      "Crecer en ingresos y mantener costos bajos",
+      "Tener oficinas grandes",
+      "Guardar datos en la nube",
+    ],
+    correctText: "Crecer en ingresos y mantener costos bajos",
+    explanation: "Crecer en ventas a mayor ritmo que los gastos.",
+  },
+];
+
+/* ============================================================
+   ③ MOTOR RESPONSIVO — Viewport Scaling
+   ─────────────────────────────────────────────────────────
+   El stage de 1920×1080 se escala uniformemente para caber
+   en cualquier ventana sin distorsión ni recorte.
+   ============================================================ */
+const DESIGN_W = 1920;
+const DESIGN_H = 1080;
+const stageEl  = document.getElementById('stage');
+let   currentScale = 1;
+
+function shouldUseAdaptiveLayout() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  return vw <= 900 || vh > vw * 1.15;
+}
+
+function rescale() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  if (shouldUseAdaptiveLayout()) {
+    currentScale = 1;
+    stageEl.classList.add('adaptive');
+    stageEl.style.top = '0';
+    stageEl.style.left = '0';
+    stageEl.style.transform = 'none';
+    return;
+  }
+
+  stageEl.classList.remove('adaptive');
+  stageEl.style.top = '50%';
+  stageEl.style.left = '50%';
+  currentScale = Math.min(vw / DESIGN_W, vh / DESIGN_H);
+  stageEl.style.transform =
+    `translate(-50%, -50%) scale(${currentScale})`;
+}
+rescale();
+window.addEventListener('resize', rescale);
+window.addEventListener('orientationchange', () => setTimeout(rescale, 120));
+
+/** Convierte coordenadas de pantalla → espacio local del stage */
+function toStage(clientX, clientY) {
+  const r = stageEl.getBoundingClientRect();
+  return {
+    x: (clientX - r.left) / currentScale,
+    y: (clientY - r.top)  / currentScale,
+  };
+}
+
+/* ============================================================
+   ④ INICIALIZACIÓN DE RECURSOS (fondo y QR)
+   ============================================================ */
+(function initResources() {
+  // Fondo
+  if (CONFIG.BG_IMAGE) {
+    document.getElementById('bg-layer').style.backgroundImage =
+      `url('${CONFIG.BG_IMAGE}')`;
+  }
+
+  // QR
+  const qrEl = document.getElementById('qrImg');
+  if (CONFIG.QR_IMAGE) {
+    qrEl.src = CONFIG.QR_IMAGE;
+  } else {
+    /* Placeholder SVG con animación si no hay imagen */
+    qrEl.src = generateQRPlaceholder();
+  }
+
+  // Sub-label del QR
+  document.getElementById('qrSubLabel').textContent = CONFIG.QR_SUBLABEL;
+
+  // Eventos de botones
+  document.getElementById('btnStart').addEventListener('click', startGame);
+  document.getElementById('btnRestart').addEventListener('click', restartGame);
+})();
+
+/** Genera un placeholder SVG de QR cuando no hay imagen definida */
+function generateQRPlaceholder() {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340">
+    <rect width="340" height="340" fill="#0d1b4b" rx="12"/>
+    <rect x="20" y="20" width="120" height="120" rx="8" fill="none" stroke="#00d4ff" stroke-width="8"/>
+    <rect x="40" y="40" width="80" height="80" rx="4" fill="#00d4ff" opacity=".8"/>
+    <rect x="200" y="20" width="120" height="120" rx="8" fill="none" stroke="#00d4ff" stroke-width="8"/>
+    <rect x="220" y="40" width="80" height="80" rx="4" fill="#00d4ff" opacity=".8"/>
+    <rect x="20" y="200" width="120" height="120" rx="8" fill="none" stroke="#00d4ff" stroke-width="8"/>
+    <rect x="40" y="220" width="80" height="80" rx="4" fill="#00d4ff" opacity=".8"/>
+    <rect x="150" y="150" width="40" height="40" rx="4" fill="#fbed64" opacity=".9"/>
+    <rect x="200" y="150" width="16" height="16" rx="2" fill="#00d4ff" opacity=".7"/>
+    <rect x="224" y="150" width="16" height="16" rx="2" fill="#ff09e3" opacity=".7"/>
+    <rect x="200" y="174" width="40" height="16" rx="2" fill="#00d4ff" opacity=".6"/>
+    <rect x="200" y="200" width="16" height="16" rx="2" fill="#fbed64" opacity=".7"/>
+    <rect x="150" y="200" width="40" height="16" rx="2" fill="#ff09e3" opacity=".5"/>
+    <text x="170" y="310" text-anchor="middle" fill="rgba(255,255,255,0.4)"
+          font-family="monospace" font-size="13">Agrega tu QR en CONFIG.QR_IMAGE</text>
+  </svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
+}
+
+/* ============================================================
+   ⑤ UTILIDADES
+   ============================================================ */
+
+/** Fisher-Yates shuffle — mezcla un array sin mutar el original */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Muestra/oculta pantallas */
+function showScreen(id) {
+  document.querySelectorAll('.screen')
+    .forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ============================================================
+   ⑥ ESTADO DEL JUEGO
+   ============================================================ */
+let state = {
+  questions:       [],   // preguntas mezcladas para esta ronda
+  currentQ:        0,
+  score:           0,
+  answered:        false,
+  countdownTimer:  null,
+  nextTimer:       null,
+};
+
+/* ============================================================
+   ⑦ FLUJO PRINCIPAL
+   ============================================================ */
+
+/** Inicia o reinicia el juego */
+function startGame() {
+  /* Mezclar preguntas y, dentro de cada pregunta, mezclar respuestas */
+  state.questions = shuffle(QUESTION_BANK).map(q => {
+    const shuffledOptions = shuffle(q.options);
+    const correctIdx = shuffledOptions.indexOf(q.correctText);
+    return {
+      category:   q.category,
+      text:       q.text,
+      options:    shuffledOptions,
+      correct:    correctIdx,       // índice correcto tras el shuffle
+      explanation: q.explanation,
+    };
+  });
+
+  state.currentQ = 0;
+  state.score    = 0;
+  state.answered = false;
+  document.getElementById('scoreDisplay').textContent = '0';
+
+  showScreen('screen-question');
+  loadQuestion();
+}
+
+function restartGame() {
+  /* El restart llama a startGame, que vuelve a mezclar todo */
+  startGame();
+}
+
+/** Carga y renderiza la pregunta actual */
+function loadQuestion() {
+  state.answered = false;
+  clearTimers();
+
+  const q     = state.questions[state.currentQ];
+  const total = state.questions.length;
+
+  // Actualizar indicadores de progreso
+  document.getElementById('qNumDisplay').textContent   = state.currentQ + 1;
+  document.getElementById('qTotalDisplay').textContent = total;
+  document.getElementById('progressBar').style.width   =
+    ((state.currentQ / total) * 100) + '%';
+
+  // Animar entrada de la tarjeta
+  const card = document.getElementById('questionCard');
+  card.classList.remove('q-enter');
+  void card.offsetWidth;       // forzar reflow para reiniciar animación
+  card.classList.add('q-enter');
+
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qText').textContent     = q.text;
+
+  // Generar botones de respuesta
+  const grid = document.getElementById('answersGrid');
+  grid.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.setAttribute('data-index', i);
+    btn.innerHTML = `<div class="answer-text">${opt}</div>`;
+    btn.style.animation      = 'fadeUp .4s ease both';
+    btn.style.animationDelay = (i * .08) + 's';
+    btn.addEventListener('click', e => handleAnswer(i, e));
+    grid.appendChild(btn);
+  });
+
+  startCountdown(CONFIG.QUESTION_TIME);
+}
+
+/* ============================================================
+   ⑧ MANEJO DE RESPUESTA
+   ============================================================ */
+
+function handleAnswer(chosenIdx, event) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimers();
+
+  const q       = state.questions[state.currentQ];
+  const buttons = document.querySelectorAll('.answer-btn');
+  const isOk    = chosenIdx === q.correct;
+
+  // Efecto visual de toque
+  if (event && event.clientX) createRipple(event, buttons[chosenIdx]);
+
+  // Colorear botones
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct)       btn.classList.add('correct');
+    else if (i === chosenIdx)  btn.classList.add('wrong');
+    else                       btn.classList.add('dimmed');
+  });
+
+  // Actualizar puntaje
+  if (isOk) {
+    state.score++;
+    const sv = document.getElementById('scoreDisplay');
+    sv.textContent = state.score;
+    sv.classList.remove('pop');
+    void sv.offsetWidth;
+    sv.classList.add('pop');
+    spawnParticles(event, '#fbed64');
+  } else {
+    spawnParticles(event, '#ff3860');
+  }
+
+  showFeedback(isOk);
+  showExplanation(q.explanation);
+
+  // Avanzar a la siguiente pregunta tras pausa
+  state.nextTimer = setTimeout(() => {
+    hideFeedback();
+    hideExplanation();
+    if (state.currentQ < state.questions.length - 1) {
+      state.currentQ++;
+      loadQuestion();
+    } else {
+      showResults();
+    }
+  }, 3200);
+}
+
+function timeUp() {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimers();
+
+  const q = state.questions[state.currentQ];
+  document.querySelectorAll('.answer-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.add(i === q.correct ? 'correct' : 'dimmed');
+  });
+
+  showFeedback(false, true);
+  showExplanation(q.explanation);
+
+  state.nextTimer = setTimeout(() => {
+    hideFeedback();
+    hideExplanation();
+    if (state.currentQ < state.questions.length - 1) {
+      state.currentQ++;
+      loadQuestion();
+    } else {
+      showResults();
+    }
+  }, 3200);
+}
+
+/* ============================================================
+   ⑨ INTERACCIÓN OCULTA POR TECLADO (1-4)
+   ─────────────────────────────────────────────────────────
+   Las teclas siguen funcionando para operación en evento, pero
+   no se muestran en pantalla ni al lado de las respuestas.
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  const key = e.key;
+  /* Solo activa cuando la pantalla de pregunta está visible */
+  if (!document.getElementById('screen-question').classList.contains('active')) return;
+  if (state.answered) return;
+
+  const map = { '1': 0, '2': 1, '3': 2, '4': 3 };
+  if (key in map) {
+    const idx  = map[key];
+    const btns = document.querySelectorAll('.answer-btn');
+    if (btns[idx]) {
+      /* Simular evento con coordenadas del centro del botón */
+      const rect = btns[idx].getBoundingClientRect();
+      const fakeEvent = {
+        clientX: rect.left + rect.width  / 2,
+        clientY: rect.top  + rect.height / 2,
+      };
+      handleAnswer(idx, fakeEvent);
+    }
+  }
+});
+
+/* ============================================================
+   ⑩ CUENTA REGRESIVA
+   ============================================================ */
+const CIRCUMFERENCE = 2 * Math.PI * 30; // 188.5 px
+
+function startCountdown(seconds) {
+  const ring      = document.getElementById('countdownRing');
+  const fillEl    = document.getElementById('countdownFill');
+  const numEl     = document.getElementById('countdownNum');
+  ring.style.display = 'block';
+
+  let remaining = seconds;
+  numEl.textContent           = remaining;
+  fillEl.style.strokeDashoffset = '0';
+
+  state.countdownTimer = setInterval(() => {
+    remaining--;
+    numEl.textContent = remaining;
+    fillEl.style.strokeDashoffset =
+      CIRCUMFERENCE * (1 - remaining / CONFIG.QUESTION_TIME);
+
+    const danger = remaining <= Math.ceil(CONFIG.QUESTION_TIME * 0.33);
+    fillEl.style.stroke = danger ? '#ff3860' : '#00d4ff';
+    numEl.style.color   = danger ? '#ff3860' : '#00d4ff';
+
+    if (remaining <= 0) {
+      clearInterval(state.countdownTimer);
+      ring.style.display = 'none';
+      timeUp();
+    }
+  }, 1000);
+}
+
+function clearTimers() {
+  clearInterval(state.countdownTimer);
+  clearTimeout(state.nextTimer);
+  const ring = document.getElementById('countdownRing');
+  ring.style.display = 'none';
+  document.getElementById('countdownFill').style.stroke = '#00d4ff';
+  document.getElementById('countdownNum').style.color   = '#00d4ff';
+}
+
+/* ============================================================
+   ⑪ MENSAJES DE FEEDBACK
+   ============================================================ */
+const MSG_CORRECT = ['¡CORRECTO!', '¡EXACTO!', '¡BRILLANTE!', '¡ASÍ SE HACE!'];
+const MSG_WRONG   = ['¡INCORRECTO!', '¡OPS!', 'SIGUE INTENTANDO'];
+
+function showFeedback(isOk, timeOut = false) {
+  const overlay = document.getElementById('feedbackOverlay');
+  const msg     = document.getElementById('feedbackMsg');
+
+  if (timeOut) {
+    msg.className   = 'feedback-msg wrong-msg';
+    msg.textContent = '⏱ ¡TIEMPO!';
+  } else if (isOk) {
+    msg.className   = 'feedback-msg correct-msg';
+    msg.textContent = '✓ ' + MSG_CORRECT[Math.floor(Math.random() * MSG_CORRECT.length)];
+  } else {
+    msg.className   = 'feedback-msg wrong-msg';
+    msg.textContent = '✗ ' + MSG_WRONG[Math.floor(Math.random() * MSG_WRONG.length)];
+  }
+
+  overlay.classList.add('show');
+  setTimeout(() => overlay.classList.remove('show'), 2000);
+}
+function hideFeedback()    { document.getElementById('feedbackOverlay').classList.remove('show'); }
+function showExplanation(t){ document.getElementById('explanationText').textContent = t;
+                             document.getElementById('explanationBox').classList.add('show'); }
+function hideExplanation() { document.getElementById('explanationBox').classList.remove('show'); }
+
+/* ============================================================
+   ⑫ PANTALLA DE RESULTADOS
+   ============================================================ */
+function showResults() {
+  const total = state.questions.length;
+  const score = state.score;
+  const pct   = score / total;
+
+  document.getElementById('finalScoreNum').textContent  = score;
+  document.getElementById('finalScoreTotal').textContent = '/ ' + total;
+
+  const deg = Math.round(pct * 360);
+  document.getElementById('scoreCircleBg').style.background =
+    `conic-gradient(#fbed64 ${deg}deg, rgba(7,91,138,0.3) 0%)`;
+
+  /* Mensajes según porcentaje */
+  const levels = [
+    { min: 1.0, e: '🏆', t: '¡Perfecto!',       d: 'Eres un experto del ecosistema digital colombiano.' },
+    { min: 0.8, e: '🚀', t: '¡Excelente!',       d: 'Dominas el emprendimiento digital. ¡Sigue así!'    },
+    { min: 0.6, e: '💡', t: '¡Muy bien!',        d: 'Tienes una base sólida. ¡Sigue aprendiendo!'       },
+    { min: 0.4, e: '📈', t: '¡Buen inicio!',     d: 'Vas por buen camino hacia la innovación digital.'  },
+    { min: 0,   e: '🌱', t: '¡Sigue creciendo!', d: 'El aprendizaje es parte del camino emprendedor.'   },
+  ];
+  const lvl = levels.find(l => pct >= l.min);
+  document.getElementById('resultEmoji').textContent = lvl.e;
+  document.getElementById('resultText').textContent  = lvl.t;
+  document.getElementById('resultDesc').textContent  = lvl.d;
+  document.getElementById('progressBar').style.width = '100%';
+
+  showScreen('screen-results');
+  spawnBurstParticles();
+}
+
+/* ============================================================
+   ⑬ PARTÍCULAS Y EFECTOS VISUALES
+   ============================================================ */
+
+/** Crea efecto de onda al tocar un botón */
+function createRipple(event, btn) {
+  const rect = btn.getBoundingClientRect();
+  const r    = document.createElement('span');
+  r.className = 'ripple';
+  const size = Math.max(rect.width, rect.height) * 2;
+  r.style.cssText = `
+    width:${size}px; height:${size}px;
+    left:${event.clientX - rect.left - size / 2}px;
+    top:${event.clientY  - rect.top  - size / 2}px;`;
+  btn.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+}
+
+/** Lanza partículas desde la posición del toque */
+function spawnParticles(event, color) {
+  const wrap = document.getElementById('particlesWrap');
+
+  /* Convertir a coordenadas del stage (independiente del scale) */
+  const { x, y } = (event && event.clientX != null)
+    ? toStage(event.clientX, event.clientY)
+    : { x: DESIGN_W / 2, y: DESIGN_H / 2 };
+
+  const palette = color === '#fbed64'
+    ? ['#fbed64', '#f9c200', '#ffffff', '#00d4ff']
+    : ['#ff3860', '#ff09e3', '#ffffff', '#ff6b6b'];
+
+  for (let i = 0; i < 22; i++) {
+    const p    = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 12 + 4;
+    const ang  = Math.random() * 360;
+    const dist = Math.random() * 220 + 80;
+    const tx   = Math.cos(ang * Math.PI / 180) * dist;
+    const ty   = Math.sin(ang * Math.PI / 180) * dist;
+    const dur  = Math.random() * 600 + 400;
+    const c    = palette[Math.floor(Math.random() * palette.length)];
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${x}px; top:${y}px; background:${c};
+      --tx:${tx}px; --ty:${ty}px;
+      animation: particleFly ${dur}ms ease-out forwards;`;
+    wrap.appendChild(p);
+    setTimeout(() => p.remove(), dur + 50);
+  }
+}
+
+/** Explosión de partículas para la pantalla de resultados */
+function spawnBurstParticles() {
+  for (let b = 0; b < 8; b++) {
+    setTimeout(() => {
+      const sx   = Math.random() * DESIGN_W;
+      const sy   = Math.random() * DESIGN_H;
+      const rect = stageEl.getBoundingClientRect();
+      spawnParticles({
+        clientX: rect.left + sx * currentScale,
+        clientY: rect.top  + sy * currentScale,
+      }, '#fbed64');
+    }, b * 200);
+  }
+}
+</script>
+</body>
+</html>
