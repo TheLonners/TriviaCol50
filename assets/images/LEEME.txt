@@ -1,7 +1,11 @@
-Guarda aquí las imágenes del proyecto.
+IMÁGENES CONECTADAS
 
-Rutas sugeridas en index.html:
+El archivo index.html ya está configurado para reconocer estas imágenes automáticamente:
+
 - Fondo: ./assets/images/fondo.jpg
 - QR: ./assets/images/qr-emprendimiento.png
 
-Después actualiza CONFIG.BG_IMAGE y CONFIG.QR_IMAGE en el archivo index.html.
+Para reemplazarlas, conserva exactamente estos nombres y esta carpeta:
+assets/images/
+
+Si cambias el nombre del archivo, actualiza las variables CONFIG.BG_IMAGE y CONFIG.QR_IMAGE dentro de index.html.

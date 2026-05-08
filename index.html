@@ -10,11 +10,10 @@
      TRIVIA EMPRENDIMIENTO DIGITAL 2026
      ============================================================
      GUÍA RÁPIDA DE PERSONALIZACIÓN:
-     ─────────────────────────────────────────────────────────
-     • Imagen de fondo  → guarda el archivo en assets/images y busca: BACKGROUND_IMAGE
-     • Imagen QR        → guarda el archivo en assets/images y busca: QR_IMAGE
-     • Tiempo pregunta  → busca: QUESTION_TIME
-     • Preguntas        → busca: BANK DE PREGUNTAS
+     • Imagen de fondo  → CONFIG.BG_IMAGE / CONFIG.BG_IMAGE_VERTICAL
+     • Imagen QR        → CONFIG.QR_IMAGE
+     • Tiempo pregunta  → CONFIG.QUESTION_TIME
+     • Preguntas        → QUESTION_BANK
      ============================================================ -->
 
 <style>
@@ -42,14 +41,6 @@
   --glow-m:   0 0 30px rgba(255,9,227,0.6);
 }
 
-/* ============================================================
-   ESTRATEGIA RESPONSIVA — Híbrida
-   ─────────────────────────────────────────────────────────
-   • En desktop/pantallas LED conserva el diseño máster 1920×1080.
-   • En tablets y celulares, especialmente vertical, JS activa
-     #stage.adaptive para que la UI se reorganice y no quede diminuta.
-   • No hay bloqueo de orientación: funciona en horizontal y vertical.
-   ============================================================ */
 html, body {
   width: 100%;
   height: 100%;
@@ -66,31 +57,22 @@ html, body {
   height: 1080px;
   top:  50%;
   left: 50%;
-  /* JS inyecta: transform: translate(-50%,-50%) scale(s) */
   transform-origin: center center;
   overflow: hidden;
   color: var(--white);
 }
 
 /* ============================================================
-   FONDO (BACKGROUND_IMAGE)
-   ─────────────────────────────────────────────────────────
-   Para cambiar la imagen de fondo busca la variable
-   JS  →  CONFIG.BG_IMAGE  (línea ~340 del script)
-   o cambia directamente el background-image aquí abajo.
-
-   Si no hay imagen, se usa el gradiente de marca como fallback.
+   FONDO
    ============================================================ */
 #bg-layer {
   position: absolute;
   inset: 0;
   z-index: 0;
-  /* La imagen se asigna dinámicamente desde JS (CONFIG.BG_IMAGE) */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
-/* Capa de oscurecimiento sobre la imagen para mantener legibilidad */
 #bg-overlay {
   position: absolute;
   inset: 0;
@@ -98,7 +80,7 @@ html, body {
   background:
     radial-gradient(ellipse 80% 60% at 15% 110%, rgba(7,91,138,0.60) 0%, transparent 70%),
     radial-gradient(ellipse 60% 50% at 85% -10%,  rgba(255,9,227,0.25) 0%, transparent 70%),
-    rgba(8, 8, 30, 0.55);
+    rgba(8, 8, 30, 0.3);
 }
 
 /* Circuito decorativo SVG */
@@ -122,7 +104,7 @@ html, body {
 
 /* Orbes flotantes decorativos */
 .orb {
-  position: absolute; border-radius: 50%;
+  position: absolute; border-radius: 60%;
   filter: blur(2px); animation: floatOrb linear infinite;
   z-index: 2; pointer-events: none;
 }
@@ -150,14 +132,13 @@ html, body {
 }
 
 /* ============================================================
-   APP – CAPA PRINCIPAL (sobre el fondo)
+   APP – CAPA PRINCIPAL
    ============================================================ */
 #app {
   position: absolute; inset: 0; z-index: 10;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Pantallas */
 .screen {
   display: none;
   width: 1920px; height: 1080px;
@@ -166,48 +147,93 @@ html, body {
 .screen.active { display: flex; }
 
 /* ============================================================
-   PANTALLA DE BIENVENIDA
+   PANTALLA DE BIENVENIDA – DESKTOP (1920×1080)
    ============================================================ */
 #screen-welcome {
-  flex-direction: row;          /* logo-izq | QR-der */
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 120px;
+  gap: 100px;
   padding: 60px 100px;
 }
 
-/* Columna izquierda: logos + título + botón */
+/* Columna izquierda: logos + main-logo + subtítulo + botón */
 .welcome-left {
   display: flex; flex-direction: column;
   align-items: flex-start; gap: 0;
   flex: 1; max-width: 900px;
 }
 
+/* ── BARRA DE LOGOS DE MARCA ── */
 .brand-logos {
-  display: flex; align-items: center; gap: 40px;
-  margin-bottom: 36px;
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  margin-bottom: 44px;
   animation: fadeDown .7s ease both;
 }
-.brand-tag {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 14px; font-weight: 600;
-  letter-spacing: 3px; color: rgba(255,255,255,0.55);
-  text-transform: uppercase;
-}
-.brand-divider { width:1px; height:32px; background:rgba(255,255,255,0.2); }
 
-.welcome-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 96px; font-weight: 900; line-height: 1;
-  letter-spacing: -2px; margin-bottom: 14px;
+/* Contenedores de logo: igualan el área visual sin deformar las marcas */
+.brand-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  height: 84px;
+}
+
+.brand-logo-box--tic {
+  width: 92px;
+}
+
+.brand-logo-box--innpulsa {
+  width: 245px;
+}
+
+/* Imagen de logo genérica */
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  filter: brightness(1.05);
+  transition: filter .2s;
+}
+
+/* TIC e iNNpulsa mantienen proporción nativa dentro de su caja */
+.brand-logo--tic,
+.brand-logo--innpulsa {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-divider {
+  width:1px;
+  height:72px;
+  background:rgba(255,255,255,0.22);
+  flex: 0 0 auto;
+}
+
+/* ── LOGO PRINCIPAL (reemplaza texto "Emprendimiento Digital") ── */
+.main-logo {
+  display: block;
+  max-width: 560px;
+  max-height: 190px;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: 22px;
   animation: fadeDown .85s ease .08s both;
-}
-.welcome-title .emp { color: var(--white); }
-.welcome-title .dig {
-  color: var(--yellow);
-  text-shadow: 0 0 40px rgba(251,237,100,.75), 0 0 80px rgba(251,237,100,.3);
+  filter:
+    brightness(1.1)
+    drop-shadow(0 0 32px rgba(251,237,100,0.5))
+    drop-shadow(0 0 80px rgba(251,237,100,0.2));
 }
 
+/* ── Subtítulo Trivia 2026 ── */
 .welcome-sub {
   font-size: 26px; font-weight: 600;
   color: rgba(255,255,255,0.55); letter-spacing: 8px;
@@ -215,27 +241,9 @@ html, body {
   animation: fadeDown .9s ease .16s both;
 }
 
-/* Indicador de teclas */
-.kb-hint {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 32px;
-  animation: fadeUp .9s ease .3s both;
-}
-.kb-badge {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 16px; font-weight: 700;
-  color: var(--cyan); background: rgba(0,212,255,0.12);
-  border: 1.5px solid rgba(0,212,255,0.35);
-  border-radius: 8px; padding: 6px 14px;
-  text-shadow: var(--glow-c);
-}
-.kb-text {
-  font-size: 18px; color: rgba(255,255,255,0.45);
-  letter-spacing: 1px;
-}
-/* La interacción numérica existe, pero queda oculta visualmente. */
 .kb-hint, .answer-number-wrap { display: none !important; }
 
+/* ── Botón Comenzar ── */
 .btn-start {
   font-family: 'Orbitron', sans-serif;
   font-size: 30px; font-weight: 700;
@@ -259,13 +267,7 @@ html, body {
   50%     { box-shadow: 0 0 70px rgba(251,237,100,.9), 0 8px 40px rgba(0,0,0,.4); }
 }
 
-/* Columna derecha: QR */
-/* ============================================================
-   QR CODE (QR_IMAGE)
-   ─────────────────────────────────────────────────────────
-   Para cambiar la imagen del QR busca en JS:
-     CONFIG.QR_IMAGE  (línea ~345 del script)
-   ============================================================ */
+/* ── Columna derecha: QR ── */
 .welcome-right {
   display: flex; flex-direction: column;
   align-items: center; gap: 24px;
@@ -291,7 +293,7 @@ html, body {
   width: 340px; height: 340px;
   border-radius: 12px;
   object-fit: contain;
-  background: #fff; /* fallback si la imagen tarda */
+  background: #fff;
 }
 .qr-label {
   font-family: 'Orbitron', sans-serif;
@@ -310,10 +312,10 @@ html, body {
    ============================================================ */
 #screen-question {
   flex-direction: column;
-  padding: 0 80px; gap: 0;
+  justify-content: flex-start;
+  padding: 80px 100px 0; gap: 0;
 }
 
-/* Barra superior */
 .top-bar {
   width: 100%; display: flex; align-items: center;
   justify-content: space-between;
@@ -351,7 +353,6 @@ html, body {
   100%{ transform:scale(1);   }
 }
 
-/* Barra de progreso */
 .progress-bar-wrap {
   width: 100%; height: 6px;
   background: rgba(255,255,255,.08);
@@ -366,7 +367,6 @@ html, body {
   box-shadow: 0 0 12px rgba(0,212,255,.6);
 }
 
-/* Tarjeta de pregunta */
 .question-card {
   width: 100%; max-width: 1340px;
   background: var(--card-bg);
@@ -395,7 +395,6 @@ html, body {
   color: var(--white);
 }
 
-/* Grid de respuestas */
 .answers-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -429,26 +428,6 @@ html, body {
 .answer-btn:active:not(:disabled) { transform: scale(.98); }
 .answer-btn:disabled { cursor: default; }
 
-/* Número de tecla + letra */
-.answer-number-wrap {
-  display: flex; flex-direction: column;
-  align-items: center; gap: 4px;
-  flex-shrink: 0;
-}
-.answer-key {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px; font-weight: 600; letter-spacing: 1px;
-  color: rgba(255,255,255,0.3); text-transform: uppercase;
-}
-.answer-letter {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 26px; font-weight: 900; color: var(--cyan);
-  min-width: 50px; height: 50px; border-radius: 12px;
-  background: rgba(0,212,255,.1);
-  border: 2px solid rgba(0,212,255,.25);
-  display: flex; align-items: center; justify-content: center;
-  transition: all .3s;
-}
 .answer-text {
   font-family: 'Nunito Sans', sans-serif;
   font-size: 24px; font-weight: 700;
@@ -456,26 +435,17 @@ html, body {
   width: 100%; text-align: center;
 }
 
-/* Estados de respuesta */
 .answer-btn.correct {
   border-color: var(--correct);
   background: rgba(57,255,20,.15);
   box-shadow: 0 0 40px rgba(57,255,20,.35), 0 8px 30px rgba(0,0,0,.3);
   animation: correctPulse .5s ease;
 }
-.answer-btn.correct .answer-letter {
-  background: var(--correct); border-color: var(--correct);
-  color: #08081e; box-shadow: 0 0 20px rgba(57,255,20,.6);
-}
 .answer-btn.wrong {
   border-color: var(--wrong);
   background: rgba(255,56,96,.15);
   box-shadow: 0 0 40px rgba(255,56,96,.3), 0 8px 30px rgba(0,0,0,.3);
   animation: wrongShake .5s ease;
-}
-.answer-btn.wrong .answer-letter {
-  background: var(--wrong); border-color: var(--wrong);
-  color: var(--white); box-shadow: 0 0 20px rgba(255,56,96,.6);
 }
 .answer-btn.dimmed { opacity: .22; }
 @keyframes correctPulse {
@@ -488,7 +458,6 @@ html, body {
   75%{transform:translateX(-4px);}
 }
 
-/* Efecto ripple al tocar */
 .ripple {
   position:absolute; border-radius:50%; transform:scale(0);
   animation: rippleAnim .6s linear; pointer-events:none;
@@ -497,10 +466,8 @@ html, body {
 @keyframes rippleAnim { to { transform:scale(4); opacity:0; } }
 
 /* ============================================================
-   OVERLAYS (dentro del stage)
+   OVERLAYS
    ============================================================ */
-
-/* Mensaje feedback (Correcto / Incorrecto) */
 .feedback-overlay {
   position: absolute; inset: 0; display: flex;
   align-items: center; justify-content: center;
@@ -534,7 +501,6 @@ html, body {
   100% {transform:scale(1) rotate(0deg); opacity:1;}
 }
 
-/* Caja de explicación */
 .explanation-box {
   position: absolute; bottom: 44px; left: 50%;
   transform: translateX(-50%) translateY(20px);
@@ -557,7 +523,6 @@ html, body {
   margin-bottom: 5px; text-transform: uppercase;
 }
 
-/* Anillo de cuenta regresiva */
 .countdown-ring {
   position: absolute; top: 34px; left: 50%;
   transform: translateX(-50%); z-index: 50;
@@ -686,15 +651,11 @@ html, body {
   to   {transform:translateX(0) scale(1);      opacity:1;}
 }
 
-
-
 /* ============================================================
-   RESPONSIVE REAL — desktop, tablets y celulares en vertical
-   ============================================================
-   En escritorio se conserva el canvas maestro 1920×1080.
-   En pantallas pequeñas o verticales JS activa #stage.adaptive:
-   la interfaz deja de escalar como imagen fija y pasa a distribuirse
-   con CSS fluido para ocupar bien la pantalla.
+   ADAPTIVE — LAYOUT VERTICAL 4:5
+   ─────────────────────────────────────────────────────────
+   Diseño principal para pantallas móviles y verticales.
+   Optimizado para proporción 4:5 (ej. 1080×1350px).
    ============================================================ */
 #stage.adaptive {
   position: fixed;
@@ -713,11 +674,13 @@ html, body {
   height: 100%;
 }
 
+/* ── Pantalla Bienvenida (Adaptive) ── */
 #stage.adaptive #screen-welcome {
   flex-direction: column;
-  justify-content: center;
-  gap: clamp(18px, 4vh, 42px);
-  padding: clamp(22px, 5vw, 54px);
+  justify-content: space-between;
+  align-items: center;
+  gap: 0;
+  padding: clamp(28px, 6vw, 56px) clamp(24px, 6vw, 48px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -726,54 +689,104 @@ html, body {
   align-items: center;
   text-align: center;
   max-width: 100%;
-  flex: 0 0 auto;
-}
-
-#stage.adaptive .brand-logos {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 10px 18px;
-  margin-bottom: clamp(14px, 3vh, 24px);
+  gap: 0;
 }
 
-#stage.adaptive .brand-divider { display: none; }
-
-#stage.adaptive .brand-tag {
-  font-size: clamp(9px, 2.2vw, 13px);
-  letter-spacing: clamp(1px, .5vw, 3px);
+/* ── Logos en barra superior (Adaptive) ── */
+#stage.adaptive .brand-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: clamp(10px, 3vw, 24px);
+  margin-bottom: clamp(20px, 4vh, 36px);
+  padding: clamp(12px, 3vw, 20px) clamp(16px, 4vw, 32px);
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: clamp(14px, 3vw, 20px);
+  backdrop-filter: blur(12px);
+  width: 100%;
+  max-width: min(92vw, 540px);
 }
 
-#stage.adaptive .welcome-title {
-  font-size: clamp(42px, 10vw, 86px);
-  letter-spacing: -1px;
-  margin-bottom: clamp(8px, 1.5vh, 14px);
+/* ── Logos institucionales en adaptive ── */
+#stage.adaptive .brand-logo-box {
+  height: clamp(48px, 10.5vw, 72px);
 }
 
+#stage.adaptive .brand-logo-box--tic {
+  width: clamp(52px, 11vw, 78px);
+}
+
+#stage.adaptive .brand-logo-box--innpulsa {
+  width: clamp(154px, 42vw, 220px);
+}
+
+#stage.adaptive .brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#stage.adaptive .brand-divider {
+  width: 1px;
+  height: clamp(38px, 8vw, 58px);
+  background: rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+/* ── Logo principal Emprendimiento Digital (Adaptive) ── */
+#stage.adaptive .main-logo {
+  max-width: min(80vw, 430px);
+  max-height: min(22vh, 150px);
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  margin-bottom: clamp(12px, 2.5vh, 22px);
+  filter:
+    brightness(1.15)
+    drop-shadow(0 0 20px rgba(251,237,100,0.55))
+    drop-shadow(0 0 60px rgba(251,237,100,0.2));
+}
+
+/* ── Subtítulo Trivia 2026 (Adaptive) ── */
 #stage.adaptive .welcome-sub {
-  font-size: clamp(14px, 3vw, 24px);
-  letter-spacing: clamp(3px, 1vw, 8px);
-  margin-bottom: clamp(22px, 4vh, 44px);
+  font-size: clamp(13px, 3.2vw, 22px);
+  letter-spacing: clamp(4px, 1.2vw, 8px);
+  margin-bottom: clamp(20px, 4.5vh, 40px);
+  color: rgba(255,255,255,0.50);
 }
 
+/* ── Botón Comenzar (Adaptive) ── */
 #stage.adaptive .btn-start {
-  font-size: clamp(18px, 4vw, 28px);
-  letter-spacing: clamp(2px, .9vw, 4px);
-  padding: clamp(18px, 4vw, 26px) clamp(46px, 12vw, 96px);
+  font-size: clamp(17px, 4.2vw, 26px);
+  letter-spacing: clamp(2px, .8vw, 4px);
+  padding: clamp(18px, 4vw, 24px) clamp(44px, 12vw, 88px);
+  border-radius: 60px;
 }
 
+/* ── QR (Adaptive) ── */
 #stage.adaptive .welcome-right {
-  gap: clamp(12px, 2vh, 22px);
+  gap: clamp(12px, 2.5vh, 20px);
   flex: 0 0 auto;
+  width: 100%;
+  align-items: center;
 }
 
 #stage.adaptive .qr-container {
-  padding: clamp(14px, 3vw, 26px);
-  border-radius: clamp(18px, 4vw, 28px);
+  padding: clamp(16px, 4vw, 28px);
+  border-radius: clamp(18px, 4vw, 26px);
 }
 
 #stage.adaptive .qr-img {
-  width: clamp(150px, 44vw, 300px);
-  height: clamp(150px, 44vw, 300px);
+  width: clamp(140px, 42vw, 280px);
+  height: clamp(140px, 42vw, 280px);
 }
 
 #stage.adaptive .qr-label {
@@ -782,12 +795,15 @@ html, body {
 }
 
 #stage.adaptive .qr-sublabel {
-  font-size: clamp(14px, 3vw, 18px);
+  font-size: clamp(13px, 3vw, 17px);
 }
 
+/* ============================================================
+   PANTALLA PREGUNTA (Adaptive)
+   ============================================================ */
 #stage.adaptive #screen-question {
   justify-content: flex-start;
-  padding: clamp(14px, 4vw, 34px);
+  padding: clamp(14px, 4vw, 32px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -860,7 +876,7 @@ html, body {
 }
 
 #stage.adaptive .answer-btn {
-  min-height: clamp(76px, 13vh, 116px);
+  min-height: clamp(72px, 12.5vh, 110px);
   padding: clamp(16px, 4vw, 30px);
   border-radius: clamp(16px, 4vw, 20px);
 }
@@ -893,6 +909,9 @@ html, body {
   transform: translateY(0);
 }
 
+/* ============================================================
+   PANTALLA RESULTADOS (Adaptive)
+   ============================================================ */
 #stage.adaptive #screen-results {
   padding: clamp(26px, 6vw, 54px);
   overflow-y: auto;
@@ -904,7 +923,7 @@ html, body {
 }
 
 #stage.adaptive .results-subtitle {
-  font-size: clamp(14px, 3vw, 22px);
+  font-size: clamp(13px, 2.8vw, 22px);
   letter-spacing: clamp(2px, .8vw, 5px);
   margin-bottom: clamp(28px, 5vh, 52px);
 }
@@ -962,11 +981,6 @@ html, body {
 </head>
 <body>
 
-
-<!-- ══════════════════════════════════════════════════════════
-     STAGE — Canvas maestro 1920×1080
-     Todo el juego vive aquí; JS lo escala al viewport.
-     ══════════════════════════════════════════════════════════ -->
 <div id="stage">
 
   <!-- CAPAS DE FONDO -->
@@ -1001,7 +1015,7 @@ html, body {
   <div class="orb orb-4"></div>
   <div class="particles-wrap" id="particlesWrap"></div>
 
-  <!-- OVERLAYS (dentro del stage para escalar junto a la UI) -->
+  <!-- OVERLAYS -->
   <div class="feedback-overlay" id="feedbackOverlay">
     <div class="feedback-msg" id="feedbackMsg"></div>
   </div>
@@ -1015,26 +1029,42 @@ html, body {
       <circle class="countdown-ring-fill" id="countdownFill"
               cx="36" cy="36" r="30" stroke-width="5" fill="none" stroke-linecap="round"/>
     </svg>
-    <div class="countdown-num" id="countdownNum">10</div>
+    <div class="countdown-num" id="countdownNum">14</div>
   </div>
 
   <!-- PANTALLAS -->
   <div id="app">
 
-    <!-- ── BIENVENIDA ── -->
+    <!-- ══ BIENVENIDA ══ -->
     <section class="screen active" id="screen-welcome">
       <div class="welcome-left">
+
+        <!-- Barra de logos institucionales: MinTIC + iNNpulsa Colombia -->
         <div class="brand-logos">
-          <span class="brand-tag">Min TIC</span>
+          <div class="brand-logo-box brand-logo-box--tic">
+            <img
+              src="./assets/images/logo_Tic.png"
+              alt="MinTIC"
+              class="brand-logo brand-logo--tic"
+            >
+          </div>
           <div class="brand-divider"></div>
-          <span class="brand-tag">Comercio · Industria · Turismo</span>
-          <div class="brand-divider"></div>
-          <span class="brand-tag">iNNpulsa Colombia</span>
+          <div class="brand-logo-box brand-logo-box--innpulsa">
+            <img
+              src="./assets/images/logo_iNNpulsa_Colombia.png"
+              alt="iNNpulsa Colombia"
+              class="brand-logo brand-logo--innpulsa"
+            >
+          </div>
         </div>
-        <h1 class="welcome-title">
-          <span class="emp">Emprendimiento</span><br>
-          <span class="dig">Digital</span>
-        </h1>
+
+        <!-- Logo principal: Emprendimiento Digital (reemplaza el texto) -->
+        <img
+          src="./assets/images/logo_emprendimiento.png"
+          alt="Emprendimiento Digital"
+          class="main-logo"
+        >
+
         <p class="welcome-sub">Trivia 2026</p>
         <button class="btn-start" id="btnStart">¡Comenzar!</button>
       </div>
@@ -1042,7 +1072,6 @@ html, body {
       <!-- QR code -->
       <div class="welcome-right">
         <div class="qr-container">
-          <!-- La imagen del QR se asigna desde CONFIG.QR_IMAGE en JS -->
           <img class="qr-img" id="qrImg" src="" alt="Código QR">
         </div>
         <div class="qr-label">Escanea el QR</div>
@@ -1050,7 +1079,7 @@ html, body {
       </div>
     </section>
 
-    <!-- ── PREGUNTA ── -->
+    <!-- ══ PREGUNTA ══ -->
     <section class="screen" id="screen-question">
       <div class="top-bar">
         <div class="q-counter">
@@ -1071,7 +1100,7 @@ html, body {
       <div class="answers-grid" id="answersGrid"></div>
     </section>
 
-    <!-- ── RESULTADOS ── -->
+    <!-- ══ RESULTADOS ══ -->
     <section class="screen" id="screen-results">
       <h2 class="results-title">¡Resultados <span>Finales</span>!</h2>
       <p class="results-subtitle">Emprendimiento Digital · Trivia 2026</p>
@@ -1090,7 +1119,6 @@ html, body {
         </div>
       </div>
       <div class="results-actions">
-        <!-- El botón reinicia el juego con preguntas nuevamente mezcladas -->
         <button class="btn-action btn-restart" id="btnRestart">Jugar de Nuevo</button>
       </div>
     </section>
@@ -1100,58 +1128,27 @@ html, body {
 
 <script>
 /* ============================================================
-   ██████╗  ██████╗ ███╗   ██╗███████╗██╗ ██████╗
-   ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝
-   ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗
-   ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║
-   ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝
-    ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝
-   ============================================================ */
-
-/* ============================================================
-   ① CONFIGURACIÓN GLOBAL – CAMBIA AQUÍ LOS VALORES CLAVE
+   CONFIGURACIÓN GLOBAL
    ============================================================ */
 const CONFIG = {
-  /* ── TIEMPO POR PREGUNTA (segundos) ─────────────────────
-     Cambia este número para modificar el tiempo disponible. */
-  QUESTION_TIME: 10,
+  /* Tiempo por pregunta (segundos) */
+  QUESTION_TIME: 14,
 
-  /* ── IMAGEN DE FONDO (BACKGROUND_IMAGE) ─────────────────
-     Pon la ruta o URL de tu imagen de fondo.
-     Ejemplos:
-       './assets/images/fondo.jpg'
-       'https://miservidor.com/fondo.png'
-     Si está vacío ('') se usará el gradiente de marca.      */
-  BG_IMAGE: '',
+  /* Imagen de fondo – landscape para desktop */
+  BG_IMAGE: './assets/images/fondo.jpg',
 
-  /* ── IMAGEN DEL CÓDIGO QR (QR_IMAGE) ────────────────────
-     Pon la ruta o URL de la imagen del QR.
-     Ejemplos:
-       './assets/images/qr-emprendimiento.png'
-       'https://miservidor.com/qr.png'
-     Si está vacío se mostrará un placeholder visual.         */
-  QR_IMAGE: '',
+  /* Imagen de fondo – para layout vertical/adaptive */
+  BG_IMAGE_VERTICAL: './assets/images/fondo_vertical.png',
 
-  /* ── TEXTO DEBAJO DEL QR ────────────────────────────── */
-  QR_SUBLABEL: 'emprendimientodigital.gov.co',
+  /* Imagen del QR */
+  QR_IMAGE: './assets/images/qr-emprendimiento.png',
+
+  /* Texto debajo del QR */
+  QR_SUBLABEL: '',
 };
 
 /* ============================================================
-   ② BANCO DE PREGUNTAS
-   ─────────────────────────────────────────────────────────
-   Para agregar/editar preguntas sigue este formato:
-   {
-     category: "Emoji + Nombre de categoría",
-     text: "Texto de la pregunta",
-     options: ["opción A","opción B","opción C","opción D"],
-     correctText: "Texto EXACTO de la opción correcta",
-     explanation: "Explicación breve de la respuesta"
-   }
-   ─────────────────────────────────────────────────────────
-   IMPORTANTE: correctText debe coincidir exactamente con
-   uno de los valores en options. Las opciones se mezclarán
-   aleatoriamente al cargar, por eso usamos correctText
-   en vez de un índice fijo.
+   BANCO DE PREGUNTAS
    ============================================================ */
 const QUESTION_BANK = [
   {
@@ -1217,15 +1214,33 @@ const QUESTION_BANK = [
 ];
 
 /* ============================================================
-   ③ MOTOR RESPONSIVO — Viewport Scaling
-   ─────────────────────────────────────────────────────────
-   El stage de 1920×1080 se escala uniformemente para caber
-   en cualquier ventana sin distorsión ni recorte.
+   MOTOR RESPONSIVO — Viewport Scaling
    ============================================================ */
 const DESIGN_W = 1920;
 const DESIGN_H = 1080;
 const stageEl  = document.getElementById('stage');
+const bgLayer  = document.getElementById('bg-layer');
 let   currentScale = 1;
+let   isAdaptiveMode = false;
+let   currentBgSrc = '';
+
+function isVerticalFormat() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  return vh > vw;
+}
+
+function getBackgroundForCurrentFormat() {
+  return isVerticalFormat() ? CONFIG.BG_IMAGE_VERTICAL : CONFIG.BG_IMAGE;
+}
+
+function updateBackgroundByFormat() {
+  const bgSrc = getBackgroundForCurrentFormat();
+  if (bgSrc && bgSrc !== currentBgSrc) {
+    currentBgSrc = bgSrc;
+    bgLayer.style.backgroundImage = `url("${bgSrc}")`;
+  }
+}
 
 function shouldUseAdaptiveLayout() {
   const vw = window.innerWidth;
@@ -1236,8 +1251,18 @@ function shouldUseAdaptiveLayout() {
 function rescale() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
+  const adaptive = shouldUseAdaptiveLayout();
 
-  if (shouldUseAdaptiveLayout()) {
+  /* Cambiar fondo según orientación real:
+     vertical  → fondo_vertical.png
+     horizontal → fondo.jpg */
+  updateBackgroundByFormat();
+
+  if (adaptive !== isAdaptiveMode) {
+    isAdaptiveMode = adaptive;
+  }
+
+  if (adaptive) {
     currentScale = 1;
     stageEl.classList.add('adaptive');
     stageEl.style.top = '0';
@@ -1250,14 +1275,13 @@ function rescale() {
   stageEl.style.top = '50%';
   stageEl.style.left = '50%';
   currentScale = Math.min(vw / DESIGN_W, vh / DESIGN_H);
-  stageEl.style.transform =
-    `translate(-50%, -50%) scale(${currentScale})`;
+  stageEl.style.transform = `translate(-50%, -50%) scale(${currentScale})`;
 }
+
 rescale();
 window.addEventListener('resize', rescale);
 window.addEventListener('orientationchange', () => setTimeout(rescale, 120));
 
-/** Convierte coordenadas de pantalla → espacio local del stage */
 function toStage(clientX, clientY) {
   const r = stageEl.getBoundingClientRect();
   return {
@@ -1267,33 +1291,39 @@ function toStage(clientX, clientY) {
 }
 
 /* ============================================================
-   ④ INICIALIZACIÓN DE RECURSOS (fondo y QR)
+   INICIALIZACIÓN DE RECURSOS
    ============================================================ */
 (function initResources() {
-  // Fondo
-  if (CONFIG.BG_IMAGE) {
-    document.getElementById('bg-layer').style.backgroundImage =
-      `url('${CONFIG.BG_IMAGE}')`;
+  const qrEl = document.getElementById('qrImg');
+
+  /* Fondo inicial según orientación real */
+  const initialBg = getBackgroundForCurrentFormat();
+  isAdaptiveMode = shouldUseAdaptiveLayout();
+
+  if (initialBg) {
+    const bgProbe = new Image();
+    bgProbe.onload  = () => { updateBackgroundByFormat(); };
+    bgProbe.onerror = () => { console.warn('Fondo no encontrado:', initialBg); };
+    bgProbe.src = initialBg;
   }
 
-  // QR
-  const qrEl = document.getElementById('qrImg');
+  /* QR */
   if (CONFIG.QR_IMAGE) {
+    qrEl.onerror = () => {
+      console.warn('QR no encontrado:', CONFIG.QR_IMAGE);
+      qrEl.onerror = null;
+      qrEl.src = generateQRPlaceholder();
+    };
     qrEl.src = CONFIG.QR_IMAGE;
   } else {
-    /* Placeholder SVG con animación si no hay imagen */
     qrEl.src = generateQRPlaceholder();
   }
 
-  // Sub-label del QR
-  document.getElementById('qrSubLabel').textContent = CONFIG.QR_SUBLABEL;
-
-  // Eventos de botones
+  document.getElementById('qrSubLabel').textContent = CONFIG.QR_SUBLABEL || '';
   document.getElementById('btnStart').addEventListener('click', startGame);
   document.getElementById('btnRestart').addEventListener('click', restartGame);
 })();
 
-/** Genera un placeholder SVG de QR cuando no hay imagen definida */
 function generateQRPlaceholder() {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340">
     <rect width="340" height="340" fill="#0d1b4b" rx="12"/>
@@ -1316,10 +1346,8 @@ function generateQRPlaceholder() {
 }
 
 /* ============================================================
-   ⑤ UTILIDADES
+   UTILIDADES
    ============================================================ */
-
-/** Fisher-Yates shuffle — mezcla un array sin mutar el original */
 function shuffle(arr) {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -1329,7 +1357,6 @@ function shuffle(arr) {
   return a;
 }
 
-/** Muestra/oculta pantallas */
 function showScreen(id) {
   document.querySelectorAll('.screen')
     .forEach(s => s.classList.remove('active'));
@@ -1337,10 +1364,10 @@ function showScreen(id) {
 }
 
 /* ============================================================
-   ⑥ ESTADO DEL JUEGO
+   ESTADO DEL JUEGO
    ============================================================ */
 let state = {
-  questions:       [],   // preguntas mezcladas para esta ronda
+  questions:       [],
   currentQ:        0,
   score:           0,
   answered:        false,
@@ -1349,39 +1376,30 @@ let state = {
 };
 
 /* ============================================================
-   ⑦ FLUJO PRINCIPAL
+   FLUJO PRINCIPAL
    ============================================================ */
-
-/** Inicia o reinicia el juego */
 function startGame() {
-  /* Mezclar preguntas y, dentro de cada pregunta, mezclar respuestas */
   state.questions = shuffle(QUESTION_BANK).map(q => {
     const shuffledOptions = shuffle(q.options);
     const correctIdx = shuffledOptions.indexOf(q.correctText);
     return {
-      category:   q.category,
-      text:       q.text,
-      options:    shuffledOptions,
-      correct:    correctIdx,       // índice correcto tras el shuffle
+      category:    q.category,
+      text:        q.text,
+      options:     shuffledOptions,
+      correct:     correctIdx,
       explanation: q.explanation,
     };
   });
-
   state.currentQ = 0;
   state.score    = 0;
   state.answered = false;
   document.getElementById('scoreDisplay').textContent = '0';
-
   showScreen('screen-question');
   loadQuestion();
 }
 
-function restartGame() {
-  /* El restart llama a startGame, que vuelve a mezclar todo */
-  startGame();
-}
+function restartGame() { startGame(); }
 
-/** Carga y renderiza la pregunta actual */
 function loadQuestion() {
   state.answered = false;
   clearTimers();
@@ -1389,22 +1407,19 @@ function loadQuestion() {
   const q     = state.questions[state.currentQ];
   const total = state.questions.length;
 
-  // Actualizar indicadores de progreso
   document.getElementById('qNumDisplay').textContent   = state.currentQ + 1;
   document.getElementById('qTotalDisplay').textContent = total;
   document.getElementById('progressBar').style.width   =
     ((state.currentQ / total) * 100) + '%';
 
-  // Animar entrada de la tarjeta
   const card = document.getElementById('questionCard');
   card.classList.remove('q-enter');
-  void card.offsetWidth;       // forzar reflow para reiniciar animación
+  void card.offsetWidth;
   card.classList.add('q-enter');
 
   document.getElementById('qCategory').textContent = q.category;
   document.getElementById('qText').textContent     = q.text;
 
-  // Generar botones de respuesta
   const grid = document.getElementById('answersGrid');
   grid.innerHTML = '';
   q.options.forEach((opt, i) => {
@@ -1422,9 +1437,8 @@ function loadQuestion() {
 }
 
 /* ============================================================
-   ⑧ MANEJO DE RESPUESTA
+   MANEJO DE RESPUESTA
    ============================================================ */
-
 function handleAnswer(chosenIdx, event) {
   if (state.answered) return;
   state.answered = true;
@@ -1434,10 +1448,8 @@ function handleAnswer(chosenIdx, event) {
   const buttons = document.querySelectorAll('.answer-btn');
   const isOk    = chosenIdx === q.correct;
 
-  // Efecto visual de toque
   if (event && event.clientX) createRipple(event, buttons[chosenIdx]);
 
-  // Colorear botones
   buttons.forEach((btn, i) => {
     btn.disabled = true;
     if (i === q.correct)       btn.classList.add('correct');
@@ -1445,7 +1457,6 @@ function handleAnswer(chosenIdx, event) {
     else                       btn.classList.add('dimmed');
   });
 
-  // Actualizar puntaje
   if (isOk) {
     state.score++;
     const sv = document.getElementById('scoreDisplay');
@@ -1461,7 +1472,6 @@ function handleAnswer(chosenIdx, event) {
   showFeedback(isOk);
   showExplanation(q.explanation);
 
-  // Avanzar a la siguiente pregunta tras pausa
   state.nextTimer = setTimeout(() => {
     hideFeedback();
     hideExplanation();
@@ -1501,44 +1511,46 @@ function timeUp() {
 }
 
 /* ============================================================
-   ⑨ INTERACCIÓN OCULTA POR TECLADO (1-4)
-   ─────────────────────────────────────────────────────────
-   Las teclas siguen funcionando para operación en evento, pero
-   no se muestran en pantalla ni al lado de las respuestas.
+   TECLADO: teclas 1-4 para respuestas, Espacio para comenzar
    ============================================================ */
 document.addEventListener('keydown', e => {
   const key = e.key;
-  /* Solo activa cuando la pantalla de pregunta está visible */
   if (!document.getElementById('screen-question').classList.contains('active')) return;
   if (state.answered) return;
-
   const map = { '1': 0, '2': 1, '3': 2, '4': 3 };
   if (key in map) {
     const idx  = map[key];
     const btns = document.querySelectorAll('.answer-btn');
     if (btns[idx]) {
-      /* Simular evento con coordenadas del centro del botón */
       const rect = btns[idx].getBoundingClientRect();
-      const fakeEvent = {
+      handleAnswer(idx, {
         clientX: rect.left + rect.width  / 2,
         clientY: rect.top  + rect.height / 2,
-      };
-      handleAnswer(idx, fakeEvent);
+      });
     }
   }
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key !== ' ' && e.code !== 'Space') return;
+  e.preventDefault();
+  if (document.getElementById('screen-welcome').classList.contains('active')) {
+    document.getElementById('btnStart').click();
+  } else if (document.getElementById('screen-results').classList.contains('active')) {
+    document.getElementById('btnRestart').click();
+  }
+});
+
 /* ============================================================
-   ⑩ CUENTA REGRESIVA
+   CUENTA REGRESIVA
    ============================================================ */
-const CIRCUMFERENCE = 2 * Math.PI * 30; // 188.5 px
+const CIRCUMFERENCE = 2 * Math.PI * 30;
 
 function startCountdown(seconds) {
-  const ring      = document.getElementById('countdownRing');
-  const fillEl    = document.getElementById('countdownFill');
-  const numEl     = document.getElementById('countdownNum');
+  const ring   = document.getElementById('countdownRing');
+  const fillEl = document.getElementById('countdownFill');
+  const numEl  = document.getElementById('countdownNum');
   ring.style.display = 'block';
-
   let remaining = seconds;
   numEl.textContent           = remaining;
   fillEl.style.strokeDashoffset = '0';
@@ -1548,11 +1560,9 @@ function startCountdown(seconds) {
     numEl.textContent = remaining;
     fillEl.style.strokeDashoffset =
       CIRCUMFERENCE * (1 - remaining / CONFIG.QUESTION_TIME);
-
     const danger = remaining <= Math.ceil(CONFIG.QUESTION_TIME * 0.33);
     fillEl.style.stroke = danger ? '#ff3860' : '#00d4ff';
     numEl.style.color   = danger ? '#ff3860' : '#00d4ff';
-
     if (remaining <= 0) {
       clearInterval(state.countdownTimer);
       ring.style.display = 'none';
@@ -1571,7 +1581,7 @@ function clearTimers() {
 }
 
 /* ============================================================
-   ⑪ MENSAJES DE FEEDBACK
+   MENSAJES DE FEEDBACK
    ============================================================ */
 const MSG_CORRECT = ['¡CORRECTO!', '¡EXACTO!', '¡BRILLANTE!', '¡ASÍ SE HACE!'];
 const MSG_WRONG   = ['¡INCORRECTO!', '¡OPS!', 'SIGUE INTENTANDO'];
@@ -1579,7 +1589,6 @@ const MSG_WRONG   = ['¡INCORRECTO!', '¡OPS!', 'SIGUE INTENTANDO'];
 function showFeedback(isOk, timeOut = false) {
   const overlay = document.getElementById('feedbackOverlay');
   const msg     = document.getElementById('feedbackMsg');
-
   if (timeOut) {
     msg.className   = 'feedback-msg wrong-msg';
     msg.textContent = '⏱ ¡TIEMPO!';
@@ -1590,7 +1599,6 @@ function showFeedback(isOk, timeOut = false) {
     msg.className   = 'feedback-msg wrong-msg';
     msg.textContent = '✗ ' + MSG_WRONG[Math.floor(Math.random() * MSG_WRONG.length)];
   }
-
   overlay.classList.add('show');
   setTimeout(() => overlay.classList.remove('show'), 2000);
 }
@@ -1600,21 +1608,20 @@ function showExplanation(t){ document.getElementById('explanationText').textCont
 function hideExplanation() { document.getElementById('explanationBox').classList.remove('show'); }
 
 /* ============================================================
-   ⑫ PANTALLA DE RESULTADOS
+   PANTALLA DE RESULTADOS
    ============================================================ */
 function showResults() {
   const total = state.questions.length;
   const score = state.score;
   const pct   = score / total;
 
-  document.getElementById('finalScoreNum').textContent  = score;
+  document.getElementById('finalScoreNum').textContent   = score;
   document.getElementById('finalScoreTotal').textContent = '/ ' + total;
 
   const deg = Math.round(pct * 360);
   document.getElementById('scoreCircleBg').style.background =
     `conic-gradient(#fbed64 ${deg}deg, rgba(7,91,138,0.3) 0%)`;
 
-  /* Mensajes según porcentaje */
   const levels = [
     { min: 1.0, e: '🏆', t: '¡Perfecto!',       d: 'Eres un experto del ecosistema digital colombiano.' },
     { min: 0.8, e: '🚀', t: '¡Excelente!',       d: 'Dominas el emprendimiento digital. ¡Sigue así!'    },
@@ -1633,10 +1640,8 @@ function showResults() {
 }
 
 /* ============================================================
-   ⑬ PARTÍCULAS Y EFECTOS VISUALES
+   PARTÍCULAS Y EFECTOS VISUALES
    ============================================================ */
-
-/** Crea efecto de onda al tocar un botón */
 function createRipple(event, btn) {
   const rect = btn.getBoundingClientRect();
   const r    = document.createElement('span');
@@ -1650,11 +1655,8 @@ function createRipple(event, btn) {
   setTimeout(() => r.remove(), 700);
 }
 
-/** Lanza partículas desde la posición del toque */
 function spawnParticles(event, color) {
   const wrap = document.getElementById('particlesWrap');
-
-  /* Convertir a coordenadas del stage (independiente del scale) */
   const { x, y } = (event && event.clientX != null)
     ? toStage(event.clientX, event.clientY)
     : { x: DESIGN_W / 2, y: DESIGN_H / 2 };
@@ -1683,7 +1685,6 @@ function spawnParticles(event, color) {
   }
 }
 
-/** Explosión de partículas para la pantalla de resultados */
 function spawnBurstParticles() {
   for (let b = 0; b < 8; b++) {
     setTimeout(() => {
